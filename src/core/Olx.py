@@ -32,6 +32,10 @@ class Olx:
         self.__ad_link = {}
         self.__names = {}
         self.__user_info = {}
+        
+        self.__pattern_all = re.compile(".*")
+        self.__pattern_window_dataLayer = re.compile(r"window.dataLayer.*")
+        self.__pattern_sellerName = re.compile(r'.*sellerName":"(.*?)"')        
 
     def handler_ads(self,i):
         response = requests.get(self.base_url+str(i))
@@ -51,9 +55,14 @@ class Olx:
         response = requests.get(ad)
         response.close()
         soup = BeautifulSoup(response.text, "html.parser")
-        script = soup.find("script",attrs={"data-json":re.compile(".*")})
-        data = json.loads(script.get("data-json"))
-        self.__user_info[data["ad"]["user"]["userId"]] = [data["ad"]["user"]["name"],data["ad"]["phone"]["phone"]]        
+        script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
+        try:
+            script_name = soup.find("script", text=self.__pattern_window_dataLayer).text             
+            sellerName = self.__pattern_sellerName.match(script_name)[1]
+        except Exception:
+            sellerName = ""
+        data = json.loads(script_data.get("data-json"))
+        self.__user_info[data["ad"]["user"]["userId"]] = sellerName, data["ad"]["user"]["name"], data["ad"]["phone"]["phone"],       
 
     def get_user(self):
         self.get_ads()
