@@ -11,8 +11,7 @@ if __name__ == "__main__":
     # olx.get_ads()
     # print(time()-start)
 
-    # start = time()
-    # olx.get_request()
-    # print(time()-start)
-
-    print(requests.get("https://apigw.olx.com.br/store/v1/accounts/ads/406403618").json()["fullName"])
+    start = time()
+    olx.get_names()
+    print(time()-start)
+    # print()
