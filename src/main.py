@@ -1,12 +1,12 @@
-from bs4 import BeautifulSoup
-import re
-import requests
-import json
+from core import Olx
+from time import time
 
 if __name__ == "__main__":
-    response = requests.get("https://ms.olx.com.br/mato-grosso-do-sul/imoveis/apartamento-sobrado-estilo-kitnet-675918225")
-    soup = BeautifulSoup(response.text, "html.parser")
-    script = soup.find("script",attrs={"data-json":re.compile(".*")})
-    data = json.loads(script.get("data-json"))
-    print(data.keys())
-    print(data["ad"]["phone"])
+
+    olx = Olx("https://rs.olx.com.br/regioes-de-porto-alegre-torres-e-santa-cruz-do-sul/centro/imoveis/venda/apartamentos")
+    start = time()
+
+    ads = olx.get_ads()
+    print(*ads.items(), sep="\n")
+    print(len(ads))
+    print(time()-start)

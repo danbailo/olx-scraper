@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
+import json
+import re
 
 #ID_ANUNCIO = 675914491
 #https://apigw.olx.com.br/store/v1/accounts/ads/ID_ANUNCIO
@@ -24,33 +26,21 @@ import requests
 # print(data["ad"]["phone"])
 
 class Olx:
-    def __init__(self, id_ad):
-        self.__links = {
-            "https://ac.olx.com.br/imoveis",
-            "https://es.olx.com.br/imoveis",
-            "https://pb.olx.com.br/imoveis",
-            "https://ro.olx.com.br/imoveis",
-            "https://al.olx.com.br/imoveis",
-            "https://go.olx.com.br/imoveis",
-            "https://pr.olx.com.br/imoveis",
-            "https://rr.olx.com.br/imoveis",
-            "https://ap.olx.com.br/imoveis",
-            "https://ma.olx.com.br/imoveis",
-            "https://pe.olx.com.br/imoveis",
-            "https://sc.olx.com.br/imoveis",
-            "https://am.olx.com.br/imoveis",
-            "https://mt.olx.com.br/imoveis",
-            "https://pi.olx.com.br/imoveis",
-            "https://sp.olx.com.br/imoveis",
-            "https://ba.olx.com.br/imoveis",
-            "https://ms.olx.com.br/imoveis",
-            "https://rj.olx.com.br/imoveis",
-            "https://se.olx.com.br/imoveis",
-            "https://ce.olx.com.br/imoveis",
-            "https://mg.olx.com.br/imoveis",
-            "https://rn.olx.com.br/imoveis",
-            "https://to.olx.com.br/imoveis",
-            "https://df.olx.com.br/imoveis",
-            "https://pa.olx.com.br/imoveis",
-            "https://rs.olx.com.br/imoveis"       
-        }
+    def __init__(self, base_url):
+        self.base_url = base_url+"?o="
+
+    def get_ads(self):
+        ad_link = {}
+        for i in range(1,101):
+            response = requests.get(self.base_url+str(i))
+            soup = BeautifulSoup(response.text,"html.parser")
+            ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
+            for ad in ad_list.findAll("a"):
+                ad_link[ad["id"]] = ad["href"]
+        return ad_link
+
+    def get_request(self):
+        response = requests.get(self.base_url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        script = soup.find("script",attrs={"data-json":re.compile(".*")})
+        return json.loads(script.get("data-json"))         
