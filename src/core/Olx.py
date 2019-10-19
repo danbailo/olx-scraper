@@ -29,7 +29,7 @@ class Olx:
     def __init__(self, base_url):
         self.base_url = base_url+"?o="
 
-    def get_ads(self):
+    def __get_ads(self):
         ad_link = {}
         for i in range(1,101):
             response = requests.get(self.base_url+str(i))
@@ -40,7 +40,11 @@ class Olx:
         return ad_link
 
     def get_request(self):
-        response = requests.get(self.base_url)
-        soup = BeautifulSoup(response.text, "html.parser")
-        script = soup.find("script",attrs={"data-json":re.compile(".*")})
-        return json.loads(script.get("data-json"))         
+        user_info = {}
+        for ad in self.__get_ads().values():
+            response = requests.get(ad)
+            soup = BeautifulSoup(response.text, "html.parser")
+            script = soup.find("script",attrs={"data-json":re.compile(".*")})
+            data = json.loads(script.get("data-json"))
+            user_info[data["ad"]["user"]["userId"]] = [data["ad"]["user"]["name"],data["ad"]["phone"]["phone"]]
+        return user_info
