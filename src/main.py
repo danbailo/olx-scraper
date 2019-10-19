@@ -12,6 +12,5 @@ if __name__ == "__main__":
     # print(time()-start)
 
     start = time()
-    olx.get_names()
+    olx.get_user()
     print(time()-start)
-    # print()

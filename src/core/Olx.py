@@ -33,40 +33,30 @@ class Olx:
         self.__names = {}
         self.__user_info = {}
 
-    def handler_ad(self,i):
+    def handler_ads(self,i):
         response = requests.get(self.base_url+str(i))
+        response.close()
         soup = BeautifulSoup(response.text,"html.parser")
         ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
         for ad in ad_list.findAll("a"):
-            self.__ad_link[ad["id"]] = [ad["href"]]
+            self.__ad_link[ad["id"]] = ad["href"]
 
     def get_ads(self):
         pool = ThreadPool(10)
-        list(pool.imap(self.handler_ad, list(range(1,101))))
+        list(pool.imap(self.handler_ads, list(range(1,101))))
         # print(list(self.__ad_link.items()))
-
-    def handler_names(self, ad):
-        response = requests.get("https://apigw.olx.com.br/store/v1/accounts/ads/"+ad).json()
-        try:
-            self.__names[ad] = response["fullName"]
-        except Exception: pass
-    
-    def get_names(self):
-        self.get_ads()
-        pool = ThreadPool(32)
-        list(pool.imap(self.handler_names, list(self.__ad_link.keys())))
-        print(*self.__names.items(),sep="\n")
-        print(len(self.__names))
-
+ 
+    #VER SE VAI DAR MTO TRABALHO PEGAR O OUTRO JSON PRA PEGAR O NOME
     def handler_user(self,ad):
-        response = requests.get(ad[1])
+        response = requests.get(ad)
+        response.close()
         soup = BeautifulSoup(response.text, "html.parser")
         script = soup.find("script",attrs={"data-json":re.compile(".*")})
         data = json.loads(script.get("data-json"))
         self.__user_info[data["ad"]["user"]["userId"]] = [data["ad"]["user"]["name"],data["ad"]["phone"]["phone"]]        
 
-    def get_request(self):
+    def get_user(self):
         self.get_ads()
         pool = ThreadPool(32)
-        list(pool.imap(self.handler_user, list(self.__ad_link.items())))
+        list(pool.imap(self.handler_user, list(self.__ad_link.values())))
         print(*self.__user_info.items(),sep="\n")
