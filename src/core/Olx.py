@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from multiprocessing.pool import ThreadPool
 import requests
 import json
 import re
@@ -28,23 +29,30 @@ import re
 class Olx:
     def __init__(self, base_url):
         self.base_url = base_url+"?o="
+        self.__ad_link = {}
+        self.__user_info = {}
 
-    def __get_ads(self):
-        ad_link = {}
-        for i in range(1,101):
-            response = requests.get(self.base_url+str(i))
-            soup = BeautifulSoup(response.text,"html.parser")
-            ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
-            for ad in ad_list.findAll("a"):
-                ad_link[ad["id"]] = ad["href"]
-        return ad_link
+    def handler_ad(self,i):
+        response = requests.get(self.base_url+str(i))
+        soup = BeautifulSoup(response.text,"html.parser")
+        ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
+        for ad in ad_list.findAll("a"):
+            self.__ad_link[ad["id"]] = ad["href"]
+
+    def get_ads(self):
+        pool = ThreadPool(10)
+        list(pool.imap(self.handler_ad, list(range(1,101))))
+        print(list(self.__ad_link))
+
+    def handler_user(self,ad):
+        response = requests.get(ad)
+        soup = BeautifulSoup(response.text, "html.parser")
+        script = soup.find("script",attrs={"data-json":re.compile(".*")})
+        data = json.loads(script.get("data-json"))
+        self.__user_info[data["ad"]["user"]["userId"]] = [data["ad"]["user"]["name"],data["ad"]["phone"]["phone"]]        
 
     def get_request(self):
-        user_info = {}
-        for ad in self.__get_ads().values():
-            response = requests.get(ad)
-            soup = BeautifulSoup(response.text, "html.parser")
-            script = soup.find("script",attrs={"data-json":re.compile(".*")})
-            data = json.loads(script.get("data-json"))
-            user_info[data["ad"]["user"]["userId"]] = [data["ad"]["user"]["name"],data["ad"]["phone"]["phone"]]
-        return user_info
+        self.get_ads()
+        pool = ThreadPool(32)
+        list(pool.imap(self.handler_user, list(self.__ad_link.values())))
+        print(self.__user_info)
