@@ -5,8 +5,7 @@ Este projeto consiste em coletar os números de telefone dos usuários que anunc
 
 ---
 ## Requisitos
-
-* `Python - versão 3.7`
+* `Python - versão 3.7` - [Download](https://www.python.org/ftp/python/3.7.3/python-3.7.3-amd64.exe)
 * `pip (Gerenciador de pacotes do Python)`
 
 ---
