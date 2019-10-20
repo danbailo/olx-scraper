@@ -7,9 +7,6 @@ import time
 import re
 import os
 
-#python -m pip install pyopenssl --user
-#https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1
-
 class Olx:
     def __init__(self, base_url, sheet):
         if base_url[:8] != "https://":
@@ -74,7 +71,7 @@ class Olx:
             except Exception:
                 if retry == 10: 
                     print("Por favor, utilize um link com uma pesquisa mais específica!")
-                    print("Aperte CTRL+C para finalizar o programa!")
+                    print("Feche o terminal/prompt de comando!")
                     exit(-1)
                 retry += 1
                 time.sleep(1)             
@@ -100,11 +97,11 @@ class Olx:
             match_phone = self.__patern_cel.match(phone_number)
             if match_phone:
                 phone_number = re.sub(match_phone[1],"",phone_number, count=1)            
-            worksheet.write(row_number, 0, phone_number)
+            worksheet.write(row_number, 0, int(phone_number))
         workbook.close()
     
     def work(self):
-        print("Coletando anúncios...")
+        print("\nColetando anúncios...")
         self.get_ads()
         print("{len_ads} anúncios foram coletados com sucesso!\n".format(len_ads=len(self.__ad_link)))
         print("Coletando números de telefones dos anunciantes...")

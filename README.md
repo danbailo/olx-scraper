@@ -26,8 +26,8 @@ Para executar o programa, abra um terminal/prompt de comando e como parâmetro d
     * `python main.py -h`
 * **Executa o programa coletando os números dos usuário que publicaram no seguinte link "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos":**
     
-    * `python main.py --link https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos`
-       
+    * `python main.py --link https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos` 
+    
 
 Neste caso, como não foi passado nenhum parâmetro para o nome da planilha, a mesma será gravada como `Números.xlsx`
 
@@ -35,10 +35,14 @@ Neste caso, como não foi passado nenhum parâmetro para o nome da planilha, a m
 
     * `python main.py --link https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos --sheet telefone`
 
+* **Exemplo coletando os dados a partir do link de uma pesquisa feita por um dispotivo mobile**
+
+    * `python main.py --l https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1 -s mobile.xlsx`
+
 O parâmetro de link pode ser usado de duas formas, `--link` ou `-l`.
 
 O parâmetro de planilha pode ser usado de duas formas, `--sheet` ou `-s`.
 
-Em ambos os casos, terão o mesmo efeito. O usuário pode também passar o nome da planilha como `telefone.xlsx`, em vez de somente `telefone`, porém, o efeito será o mesmo.
+Em ambos os casos, terão o mesmo efeito. O usuário pode também passar o nome da planilha como `nome.xlsx`, em vez de somente `nome`, porém, o efeito será o mesmo.
 
 ---
