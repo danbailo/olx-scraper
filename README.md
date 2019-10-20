@@ -22,22 +22,24 @@ Para instalar as dependências, execute o comando abaixo num terminal/power shee
 Para executar o programa, abra um terminal/power sheel/prompt de comando e como parâmetro de execução do mesmo é preciso passar o link da pesquisa que foi realizada na OLX e como parâmetro opcional, você pode escolher o nome da planilha que será gravado os números.:
 
 * `cd src/`
-* **Comando para ajuda**
+* **Comando para exibir ajuda**
     * `python main.py -h`
 * **Executa o programa coletando os números dos usuário que publicaram no seguinte link "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos":**
+
+    *Obs: Os links devem ser passados como parâmetro dentro de aspas duplas "AQUI"*
     
-    * `python main.py --link https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos` 
+    * `python main.py --link "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos"` 
     
 
 Neste caso, como não foi passado nenhum parâmetro para o nome da planilha, a mesma será gravada como `Números.xlsx`
 
 * **Executa o programa da mesma forma, mas agora a planilha será salva como `telefone.xlsx`**
 
-    * `python main.py --link https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos --sheet telefone`
+    * `python main.py --link "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos" --sheet telefone`
 
 * **Exemplo coletando os dados a partir do link de uma pesquisa feita por um dispotivo mobile**
 
-    * `python main.py --l https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1 -s mobile.xlsx`
+    * `python main.py --l "https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1" -s mobile.xlsx`
 
 O parâmetro de link pode ser usado de duas formas, `--link` ou `-l`.
 
