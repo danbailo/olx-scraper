@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import xlsxwriter
 import requests
 import json
-import time
 import re
 import os
 
