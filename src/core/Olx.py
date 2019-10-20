@@ -11,7 +11,7 @@ class Olx:
     def __init__(self, base_url, sheet):
         if base_url[:8] != "https://":
             base_url = "https://" + base_url
-        if "m.olx" in base_url:
+        if re.match(r"https:\/\/m.olx",base_url):
             base_url = re.sub(r"\&o=\d+","",base_url)
             self.__pattern_mobile = re.compile(r"(.*?p\&)(.*)")
             mobile_match = self.__pattern_mobile.match(base_url)
