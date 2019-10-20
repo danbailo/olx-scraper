@@ -15,12 +15,13 @@ class Olx:
         if base_url[:8] != "https://":
             base_url = "https://" + base_url
         if "m.olx" in base_url:
+            base_url = re.sub(r"\&o=\d+","",base_url)
             self.__pattern_mobile = re.compile(r"(.*?p\&)(.*)")
-            mobile_math = self.__pattern_mobile.match(base_url)
-            self.mobile_url = mobile_math[1]+"o=@@@&"+mobile_math[2]
+            mobile_match = self.__pattern_mobile.match(base_url)
+            self.mobile_url = mobile_match[1]+"o=@@@&"+mobile_match[2]
             self.base_url = False
-        else: 
-            self.base_url = base_url+"?o="
+        else:            
+            self.base_url = re.sub(r"\?o\=\d+","",base_url)+"?o="
             self.mobile_url = False
         self.__ad_link = {}
         self.__user_phone = {}
@@ -44,7 +45,7 @@ class Olx:
                 break
             except Exception:
                 if retry == 10: 
-                    print("Por favor, utilize um link com uma pesquisa mais específica!")
+                    print("Por favor, utilize um link com uma pesquisa mais específica!")                    
                     exit(-1)
                 retry += 1
                 time.sleep(1)
@@ -62,7 +63,6 @@ class Olx:
     def get_ads(self):
         pool = ThreadPool(10)
         list(pool.imap(self.handler_ads, list(range(1,101))))
-        print(*self.__ad_link.items(),sep="\n")
  
     def handler_user(self,ad):
         retry = 0
@@ -74,6 +74,7 @@ class Olx:
             except Exception:
                 if retry == 10: 
                     print("Por favor, utilize um link com uma pesquisa mais específica!")
+                    print("Aperte CTRL+C para finalizar o programa!")
                     exit(-1)
                 retry += 1
                 time.sleep(1)             
@@ -105,7 +106,6 @@ class Olx:
     def work(self):
         print("Coletando anúncios...")
         self.get_ads()
-        exit()
         print("{len_ads} anúncios foram coletados com sucesso!\n".format(len_ads=len(self.__ad_link)))
         print("Coletando números de telefones dos anunciantes...")
         self.get_user()
