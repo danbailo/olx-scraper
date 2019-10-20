@@ -3,60 +3,80 @@ from bs4 import BeautifulSoup
 import xlsxwriter
 import requests
 import json
+import time
 import re
 import os
 
-#ID_ANUNCIO = 675914491
-#https://apigw.olx.com.br/store/v1/accounts/ads/ID_ANUNCIO
-
-#uma forma de fazer é ir coletando todos os links e add num dict, onde a chave seria o id do anuncio
-#e o valor seria a url pra ir pro anuncio
-
-#a cada request, serao outras postagens, logo, o q da pra fazer e deixar rodando por mto tempo
-#pra ficar coletando diversos anuncios e depois fazer um crawler pra acessar cada link e pegar os dados do anunciante
-
-#depois de coletar por 
-
-
-#COLETAR LINK DOS ANUNCIOS
-#https://ms.olx.com.br/mato-grosso-do-sul/imoveis/2-pecas-e-um-banheiro-675941635
-
-# response = requests.get("https://ms.olx.com.br/mato-grosso-do-sul/imoveis/apartamento-sobrado-estilo-kitnet-675918225")
-# soup = BeautifulSoup(response.text, "html.parser")
-# script = soup.find("script",attrs={"data-json":re.compile(".*")})
-# data = json.loads(script.get("data-json"))
-# print(data.keys())
-# print(data["ad"]["phone"])
+#python -m pip install pyopenssl --user
+#https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1
 
 class Olx:
-    def __init__(self, base_url):
-        self.base_url = base_url+"?o="
+    def __init__(self, base_url, sheet):
+        if base_url[:8] != "https://":
+            base_url = "https://" + base_url
+        if "m.olx" in base_url:
+            self.__pattern_mobile = re.compile(r"(.*?p\&)(.*)")
+            mobile_math = self.__pattern_mobile.match(base_url)
+            self.mobile_url = mobile_math[1]+"o=@@@&"+mobile_math[2]
+            self.base_url = False
+        else: 
+            self.base_url = base_url+"?o="
+            self.mobile_url = False
         self.__ad_link = {}
         self.__user_phone = {}
         self.__pattern_all = re.compile(r".*")      
         self.__patern_cel = re.compile(r"\d{2}(9)\d{8}")
         self.no_number = 0
-        self.__sheet = "Números.xlsx"
+        if sheet[-5:] != ".xlsx":
+            self.__sheet = sheet+".xlsx"
+        else: self.__sheet = sheet
 
     def handler_ads(self,i):
-        response = requests.get(self.base_url+str(i))
-        if not response.ok: 
-            print("Erro ao fazer requisição!")         
-        response.close()
-        soup = BeautifulSoup(response.text,"html.parser")
-        ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
-        for ad in ad_list.findAll("a"):
-            self.__ad_link[ad["id"]] = ad["href"]
+        retry = 0
+        while True:
+            try:
+                if not self.mobile_url:
+                    response = requests.get(self.base_url+str(i))
+                else:
+                    url = self.mobile_url
+                    response = requests.get(re.sub(r"@@@",str(i),url))
+                response.close()
+                break
+            except Exception:
+                if retry == 10: 
+                    print("Por favor, utilize um link com uma pesquisa mais específica!")
+                    exit(-1)
+                retry += 1
+                time.sleep(1)
+        soup = BeautifulSoup(response.text,"html.parser")                
+        if not self.mobile_url:
+            ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
+            for ad in ad_list.findAll("a"):
+                self.__ad_link[ad["id"]] = ad["href"]
+        else:
+            ad_list = soup.find(name="ul",attrs={"id":"main-ad-list"})
+            for ad in ad_list.findAll("a"):
+                id_ad = ad["href"].split("-")[-1]
+                self.__ad_link[id_ad] = ad["href"]            
 
     def get_ads(self):
         pool = ThreadPool(10)
         list(pool.imap(self.handler_ads, list(range(1,101))))
+        print(*self.__ad_link.items(),sep="\n")
  
     def handler_user(self,ad):
-        response = requests.get(ad)
-        if not response.ok: 
-            print("Erro ao fazer requisição!")            
-        response.close()
+        retry = 0
+        while True:
+            try:
+                response = requests.get(ad)
+                response.close()
+                break
+            except Exception:
+                if retry == 10: 
+                    print("Por favor, utilize um link com uma pesquisa mais específica!")
+                    exit(-1)
+                retry += 1
+                time.sleep(1)             
         soup = BeautifulSoup(response.text, "html.parser")
         script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
         data = json.loads(script_data.get("data-json"))
@@ -85,6 +105,7 @@ class Olx:
     def work(self):
         print("Coletando anúncios...")
         self.get_ads()
+        exit()
         print("{len_ads} anúncios foram coletados com sucesso!\n".format(len_ads=len(self.__ad_link)))
         print("Coletando números de telefones dos anunciantes...")
         self.get_user()
