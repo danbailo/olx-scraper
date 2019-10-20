@@ -30,22 +30,15 @@ class Olx:
         else: self.__sheet = sheet
 
     def handler_ads(self,i):
-        retry = 0
-        while True:
-            try:
-                if not self.mobile_url:
-                    response = requests.get(self.base_url+str(i))
-                else:
-                    url = self.mobile_url
-                    response = requests.get(re.sub(r"@@@",str(i),url))
-                response.close()
-                break
-            except Exception:
-                if retry == 10: 
-                    print("Por favor, utilize um link com uma pesquisa mais específica!")                    
-                    exit(-1)
-                retry += 1
-                time.sleep(1)
+        try:
+            if not self.mobile_url:
+                response = requests.get(self.base_url+str(i))
+            else:
+                url = self.mobile_url
+                response = requests.get(re.sub(r"@@@",str(i),url))
+            response.close()
+        except Exception:
+            return False
         soup = BeautifulSoup(response.text,"html.parser")                
         if not self.mobile_url:
             ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
@@ -62,19 +55,11 @@ class Olx:
         list(pool.imap(self.handler_ads, list(range(1,101))))
  
     def handler_user(self,ad):
-        retry = 0
-        while True:
-            try:
-                response = requests.get(ad)
-                response.close()
-                break
-            except Exception:
-                if retry == 10: 
-                    print("Por favor, utilize um link com uma pesquisa mais específica!")
-                    print("Feche o terminal/prompt de comando!")
-                    exit(-1)
-                retry += 1
-                time.sleep(1)             
+        try:
+            response = requests.get(ad)
+            response.close()
+        except Exception:
+            return False            
         soup = BeautifulSoup(response.text, "html.parser")
         script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
         data = json.loads(script_data.get("data-json"))

@@ -12,14 +12,14 @@ Este projeto consiste em coletar os números de telefone dos usuários que anunc
 ---
 ## Dependências
 
-Para instalar as dependências, execute o comando abaixo num terminal/prompt de comando:
+Para instalar as dependências, execute o comando abaixo num terminal/power sheel/prompt de comando de comando:
 
 * `python -m pip install -r requirements.txt --user`
 
 ---
 ## Como usar
 
-Para executar o programa, abra um terminal/prompt de comando e como parâmetro de execução do mesmo é preciso passar o link da pesquisa que foi realizada na OLX e como parâmetro opcional, você pode escolher o nome da planilha que será gravado os números.:
+Para executar o programa, abra um terminal/power sheel/prompt de comando e como parâmetro de execução do mesmo é preciso passar o link da pesquisa que foi realizada na OLX e como parâmetro opcional, você pode escolher o nome da planilha que será gravado os números.:
 
 * `cd src/`
 * **Comando para ajuda**
