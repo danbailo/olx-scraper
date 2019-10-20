@@ -4,6 +4,7 @@ import xlsxwriter
 import requests
 import json
 import re
+import os
 
 #ID_ANUNCIO = 675914491
 #https://apigw.olx.com.br/store/v1/accounts/ads/ID_ANUNCIO
@@ -34,10 +35,13 @@ class Olx:
         self.__user_phone = {}
         self.__pattern_all = re.compile(r".*")      
         self.__patern_cel = re.compile(r"\d{2}(9)\d{8}")
+        self.no_number = 0
         self.__sheet = "Números.xlsx"
 
     def handler_ads(self,i):
         response = requests.get(self.base_url+str(i))
+        if not response.ok: 
+            print("Erro ao fazer requisição!")         
         response.close()
         soup = BeautifulSoup(response.text,"html.parser")
         ad_list = soup.find(name="div",attrs={"class":"section_OLXad-list"})
@@ -47,31 +51,35 @@ class Olx:
     def get_ads(self):
         pool = ThreadPool(10)
         list(pool.imap(self.handler_ads, list(range(1,101))))
-        # print(list(self.__ad_link.items()))
  
     def handler_user(self,ad):
-        response = requests.get(ad[1])
+        response = requests.get(ad)
+        if not response.ok: 
+            print("Erro ao fazer requisição!")            
         response.close()
         soup = BeautifulSoup(response.text, "html.parser")
         script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
         data = json.loads(script_data.get("data-json"))
-        self.__user_phone[data["ad"]["user"]["userId"]] = data["ad"]["phone"]["phone"]
+        if data["ad"]["phone"]["phone"] != '':
+            self.__user_phone[data["ad"]["user"]["userId"]] = data["ad"]["phone"]["phone"]
+        else: self.no_number += 1
 
     def get_user(self):
         pool = ThreadPool(32)
-        list(pool.imap(self.handler_user, list(self.__ad_link.items())))
-        # print(*self.__user_phone.items(),sep="\n")
+        list(pool.imap(self.handler_user, list(self.__ad_link.values())))
 
     def write_sheet(self):
-        workbook = xlsxwriter.Workbook(self.__sheet)
+        workbook = xlsxwriter.Workbook(os.path.join("..","output",self.__sheet))
         worksheet = workbook.add_worksheet()
-        phone = list(self.__user_phone.values())
-        for i in range(len(phone)):
-            if repr(phone[i]) == '': continue
-            match_phone = self.__patern_cel.match(phone[i])
+
+        phones_values = list(self.__user_phone.values())
+        phones = [phone for phone in phones_values if phone != '']
+
+        for row_number, phone_number in enumerate(phones):
+            match_phone = self.__patern_cel.match(phone_number)
             if match_phone:
-                phone[i] = re.sub(match_phone[1],"",phone[i], count=1)            
-            worksheet.write(i, 0, phone[i])
+                phone_number = re.sub(match_phone[1],"",phone_number, count=1)            
+            worksheet.write(row_number, 0, phone_number)
         workbook.close()
     
     def work(self):
@@ -80,6 +88,8 @@ class Olx:
         print("{len_ads} anúncios foram coletados com sucesso!\n".format(len_ads=len(self.__ad_link)))
         print("Coletando números de telefones dos anunciantes...")
         self.get_user()
+        print("Foram identificados {total} anunciantes!".format(total=len(self.__user_phone)+self.no_number))
+        print("{no_number} anunciantes não tinham número de telefone cadastrado.".format(no_number=self.no_number))
         print("{len_phone} números de telefone coletados com sucesso!\n".format(len_phone=len(self.__user_phone)))
         self.write_sheet()
-        print("Os números foram escritos na planilha {sheet} com sucesso!".format(sheet=self.__sheet))
+        print("Os números foram gravados na planilha {sheet} com sucesso!".format(sheet=self.__sheet))
