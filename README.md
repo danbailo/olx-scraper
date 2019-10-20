@@ -34,11 +34,11 @@ Neste caso, como não foi passado nenhum parâmetro para o nome da planilha, a m
 
 * **Executa o programa da mesma forma, mas agora a planilha será salva como `telefone.xlsx`**
 
-    * `python main.py --link "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos" --sheet telefone`
+    * `python main.py -l "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos" --sheet telefone`
 
 * **Exemplo coletando os dados a partir do link de uma pesquisa feita por um dispotivo mobile**
 
-    * `python main.py --l "https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1" -s mobile.xlsx`
+    * `python main.py -l "https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1" -s mobile.xlsx`
 
 O parâmetro de link pode ser usado de duas formas, `--link` ou `-l`.
 
