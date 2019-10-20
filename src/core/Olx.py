@@ -36,6 +36,7 @@ class Olx:
             else:
                 url = self.mobile_url
                 response = requests.get(re.sub(r"@@@",str(i),url))
+            if response.status_code != 200: return False
             response.close()
         except Exception:
             return False
@@ -57,6 +58,7 @@ class Olx:
     def handler_user(self,ad):
         try:
             response = requests.get(ad)
+            if response.status_code != 200: return False
             response.close()
         except Exception:
             return False            
