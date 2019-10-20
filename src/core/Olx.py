@@ -1,5 +1,6 @@
-from bs4 import BeautifulSoup
 from multiprocessing.pool import ThreadPool
+from bs4 import BeautifulSoup
+import xlsxwriter
 import requests
 import json
 import re
@@ -30,12 +31,10 @@ class Olx:
     def __init__(self, base_url):
         self.base_url = base_url+"?o="
         self.__ad_link = {}
-        self.__names = {}
-        self.__user_info = {}
-        
-        self.__pattern_all = re.compile(".*")
-        self.__pattern_window_dataLayer = re.compile(r"window.dataLayer.*")
-        self.__pattern_sellerName = re.compile(r'.*sellerName":"(.*?)"')        
+        self.__user_phone = {}
+        self.__pattern_all = re.compile(r".*")      
+        self.__patern_cel = re.compile(r"\d{2}(9)\d{8}")
+        self.__sheet = "Números.xlsx"
 
     def handler_ads(self,i):
         response = requests.get(self.base_url+str(i))
@@ -50,22 +49,37 @@ class Olx:
         list(pool.imap(self.handler_ads, list(range(1,101))))
         # print(list(self.__ad_link.items()))
  
-    #VER SE VAI DAR MTO TRABALHO PEGAR O OUTRO JSON PRA PEGAR O NOME
     def handler_user(self,ad):
-        response = requests.get(ad)
+        response = requests.get(ad[1])
         response.close()
         soup = BeautifulSoup(response.text, "html.parser")
         script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
-        try:
-            script_name = soup.find("script", text=self.__pattern_window_dataLayer).text             
-            sellerName = self.__pattern_sellerName.match(script_name)[1]
-        except Exception:
-            sellerName = ""
         data = json.loads(script_data.get("data-json"))
-        self.__user_info[data["ad"]["user"]["userId"]] = sellerName, data["ad"]["user"]["name"], data["ad"]["phone"]["phone"],       
+        self.__user_phone[data["ad"]["user"]["userId"]] = data["ad"]["phone"]["phone"]
 
     def get_user(self):
-        self.get_ads()
         pool = ThreadPool(32)
-        list(pool.imap(self.handler_user, list(self.__ad_link.values())))
-        print(*self.__user_info.items(),sep="\n")
+        list(pool.imap(self.handler_user, list(self.__ad_link.items())))
+        # print(*self.__user_phone.items(),sep="\n")
+
+    def write_sheet(self):
+        workbook = xlsxwriter.Workbook(self.__sheet)
+        worksheet = workbook.add_worksheet()
+        phone = list(self.__user_phone.values())
+        for i in range(len(phone)):
+            if repr(phone[i]) == '': continue
+            match_phone = self.__patern_cel.match(phone[i])
+            if match_phone:
+                phone[i] = re.sub(match_phone[1],"",phone[i], count=1)            
+            worksheet.write(i, 0, phone[i])
+        workbook.close()
+    
+    def work(self):
+        print("Coletando anúncios...")
+        self.get_ads()
+        print("{len_ads} anúncios foram coletados com sucesso!\n".format(len_ads=len(self.__ad_link)))
+        print("Coletando números de telefones dos anunciantes...")
+        self.get_user()
+        print("{len_phone} números de telefone coletados com sucesso!\n".format(len_phone=len(self.__user_phone)))
+        self.write_sheet()
+        print("Os números foram escritos na planilha {sheet} com sucesso!".format(sheet=self.__sheet))
