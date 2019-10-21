@@ -10,6 +10,12 @@ class Olx:
     def __init__(self, base_url, sheet):
         if base_url[:8] != "https://":
             base_url = "https://" + base_url
+        if re.match(r"(https\:\/\/www\.olx\.com\.br\/$)|(https\:\/\/www\.olx\.com\.br$)", base_url):
+            print('\nO link deve conter algum tópico de pesquisa, exemplo: "https://www.olx.com.br/imoveis"')
+            exit(-1)        
+        if not re.match(r".*(olx\.com\.br)", base_url):
+            print("\nPor favor, insira um link da OLX, onde este deve conter alguma pesquisa!")
+            exit(-1)
         if re.match(r"https:\/\/m.olx",base_url):
             base_url = re.sub(r"\&o=\d+","",base_url)
             self.__pattern_mobile = re.compile(r"(.*?p\&)(.*)")
@@ -27,6 +33,7 @@ class Olx:
         if sheet[-5:] != ".xlsx":
             self.__sheet = sheet+".xlsx"
         else: self.__sheet = sheet
+        
 
     def handler_ads(self,i):
         try:
@@ -59,8 +66,7 @@ class Olx:
             response = requests.get(ad)
             if response.status_code != 200: return False
             response.close()
-        except Exception:
-            return False            
+        except Exception: return False            
         soup = BeautifulSoup(response.text, "html.parser")
         script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
         data = json.loads(script_data.get("data-json"))
