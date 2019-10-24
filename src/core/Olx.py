@@ -8,10 +8,11 @@ import os
 
 class Olx:
     def __init__(self, base_url, sheet):
+        base_url = re.sub(r"\\", "", base_url)
         if base_url[:8] != "https://":
             base_url = "https://" + base_url
-        if re.match(r"(https\:\/\/www\.olx\.com\.br\/$)|(https\:\/\/www\.olx\.com\.br$)", base_url):
-            print('\nO link deve conter algum tópico de pesquisa, exemplo: "https://www.olx.com.br/imoveis"')
+        if re.match(r".*(olx\.com\.br\/$)|.*(olx\.com\.br$)", base_url):
+            print('\nO link deve conter algum tópico de pesquisa, exemplo: "https://olx.com.br/imoveis"')
             exit(-1)        
         if not re.match(r".*(olx\.com\.br)", base_url):
             print("\nPor favor, insira um link da OLX, onde este deve conter alguma pesquisa!")
@@ -21,9 +22,13 @@ class Olx:
             self.__pattern_mobile = re.compile(r"(.*?p\&)(.*)")
             mobile_match = self.__pattern_mobile.match(base_url)
             self.mobile_url = mobile_match[1]+"o=@@@&"+mobile_match[2]
-            self.base_url = False
-        else:            
-            self.base_url = re.sub(r"\?o\=\d+","",base_url)+"?o="
+            self.desktop_url = False
+        else:
+            self.__pattern_desktop = re.compile(r"(.*?p\&)(.*)")
+            desktop_match = self.__pattern_desktop.match(base_url)
+            if desktop_match:
+                self.desktop_url = desktop_match[1]+"o=@@@&"+desktop_match[2]
+            else: self.desktop_url = re.sub(r"\?o\=\d+","",base_url)+"?o="
             self.mobile_url = False
         self.__ad_link = {}
         self.__user_phone = {}
@@ -38,7 +43,8 @@ class Olx:
     def handler_ads(self,i):
         try:
             if not self.mobile_url:
-                response = requests.get(self.base_url+str(i))
+                url = self.desktop_url
+                response = requests.get(re.sub(r"@@@",str(i),url))
             else:
                 url = self.mobile_url
                 response = requests.get(re.sub(r"@@@",str(i),url))
@@ -66,7 +72,7 @@ class Olx:
             response = requests.get(ad)
             if response.status_code != 200: return False
             response.close()
-        except Exception: return False            
+        except Exception:   return False            
         soup = BeautifulSoup(response.text, "html.parser")
         script_data = soup.find("script",attrs={"data-json":self.__pattern_all})
         data = json.loads(script_data.get("data-json"))
