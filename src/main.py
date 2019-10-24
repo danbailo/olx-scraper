@@ -1,7 +1,7 @@
 from core import Olx
-import utils
+import args
 
 if __name__ == "__main__":
-    args = utils.get_args()
+    args = args.get_args_main()
     olx = Olx(args.link, args.sheet)
     olx.work()

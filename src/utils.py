@@ -1,19 +1,31 @@
-import argparse
+from pandas import read_excel
+import xlsxwriter
+import args
+import os
 
-def get_args():
-	parser=argparse.ArgumentParser(
-		prog="main.py",
-		description="Coleta os números de telefones dos anunciantes da OLX de uma determinada pesquisa."
-	)
-	parser.add_argument("-l","--link",
-		type=str,
-        required=True,
-		help="Link da pesquisa da OLX. Em caso de dúvidas, leia o arquivo README.md",
-	)
-	parser.add_argument("-s","--sheet",
-		type=str,
-        required=False,
-		default="Números.xlsx",
-		help="Nome da planilha que serão gravados os números. Em caso de dúvidas, leia o arquivo README.md",
-	)			
-	return parser.parse_args()
+def join_all_xlsx(directory):
+	all_xlsx = [os.path.join(directory,xlsx) for xlsx in os.listdir(directory) if xlsx[-5:] == ".xlsx"]
+	return all_xlsx
+
+def get_all_numbers(all_xlsx):
+	all_numbers = []
+	for xlsx in all_xlsx:
+		for number in read_excel(xlsx,header=None).values.tolist():
+			all_numbers += number
+	unique_all_numbers = set(all_numbers)
+	return unique_all_numbers
+
+def write_sheet(all_numbers, sheet):
+	if sheet[-5:] != ".xlsx":
+		sheet = sheet+".xlsx"	
+	workbook = xlsxwriter.Workbook(os.path.join("..", sheet))
+	worksheet = workbook.add_worksheet()
+	for row_number, phone_number in enumerate(all_numbers):        
+		worksheet.write(row_number, 0, phone_number)
+	workbook.close()
+
+args = args.get_args_utils()
+
+all_xlsx = join_all_xlsx(os.path.join("..","output"))
+all_numbers = get_all_numbers(all_xlsx)
+write_sheet(all_numbers, args.sheet)
