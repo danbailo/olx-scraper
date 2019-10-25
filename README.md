@@ -36,9 +36,7 @@ Neste caso, como não foi passado nenhum parâmetro para o nome da planilha, a m
 
     * `python main.py -l "https://sp.olx.com.br/sao-paulo-e-regiao/centro/imoveis/venda/apartamentos" --sheet telefone`
 
-* **Exemplo coletando os dados a partir do link de uma pesquisa feita por um dispotivo mobile**
-
-    * `python main.py -l "https://m.olx.com.br/busca?ca=51_s&cg=1001&f=p&q=Apartamento&w=1" -s mobile.xlsx`
+    * `python main.py -l "https://rs.olx.com.br/imoveis/venda/apartamentos?f=p&ps=600000&ret=1040" -s pesquisa2.xlsx`
 
 O parâmetro de link pode ser usado de duas formas, `--link` ou `-l`.
 
