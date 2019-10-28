@@ -77,6 +77,8 @@ class Olx:
         list(pool.imap(self.handler_user, list(self.__ad_link.values())))
 
     def write_sheet(self):
+        if not os.path.exists((os.path.join("..","output"))):
+            os.mkdir((os.path.join("..","output")))
         workbook = xlsxwriter.Workbook(os.path.join("..","output",self.__sheet))
         worksheet = workbook.add_worksheet()
         phones_values = list(self.__user_phone.values())
