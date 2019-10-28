@@ -60,10 +60,10 @@ Em ambos os casos, terão o mesmo efeito. O usuário pode também passar o nome 
 A vantagem de gerar essa nova planilha a partir deste módulo, é que essa nova planilha garante que os novos resultados não terão nenhum número repetido dentre todos os resultados que foram obtidos, ou seja, cada número nessa planilha é único.
 
 * `cd src/`
-* **Executa o programa que junta todos as planilhas e gera uma nova planilha de nome "Todos_números.xlsx", e o mesmo é salvo no diretório raiz.**
+* **Executa o programa que junta todos as planilhas que estão no diretório `output/` e gera uma nova planilha de nome "Todos_números.xlsx" e o mesma é salva no diretório raiz.**
     * `python utils.py`
 
-* **O nome desta nova planilha também pode ser alterado se o usuário desejar, basta utilizar o mesmo parâmetro que o anterior**
+* **O nome desta nova planilha também pode ser alterado se o usuário desejar, basta utilizar o mesmo parâmetro que o anterior.**
     * `python utils.py -s nova_planilha`
 
     * `python utils.py --sheet nova_planilha`
