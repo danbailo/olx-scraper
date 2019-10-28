@@ -25,7 +25,11 @@ def write_sheet(all_numbers, sheet):
 	workbook.close()
 
 args = args.get_args_utils()
-
-all_xlsx = join_all_xlsx(os.path.join("..","output"))
+try:
+	all_xlsx = join_all_xlsx(os.path.join("..","output"))
+except FileNotFoundError:
+	print('\nO diretório "output" ainda não foi criado!')
+	print("Por favor, leia o arquivo README.md e execute o programa de forma correta.")
+	exit(-1)
 all_numbers = get_all_numbers(all_xlsx)
 write_sheet(all_numbers, args.sheet)
